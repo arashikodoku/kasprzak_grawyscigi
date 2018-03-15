@@ -14,6 +14,14 @@ public class GdxHello extends ApplicationAdapter {
 	Texture mapa;
 	Texture grid;
 	Texture car;
+	float rotationD;
+	float rotationSpeed;
+	float forward = 0;
+	float srotdeg = 0;
+	float forwardD = 100;
+	float srotrad = 0;
+	float x = 800;
+	float y = 800;
 
 	@Override
 	public void create () {
@@ -23,6 +31,10 @@ public class GdxHello extends ApplicationAdapter {
 		mapa = new Texture("mapa.png");
 		grid = new Texture("libgdxgridtest.png");
 		car = new Texture("Audi.png");
+		rotationD = 0;
+		rotationSpeed = 50;
+
+
 	}
 
 	float time = 0;
@@ -34,20 +46,32 @@ public class GdxHello extends ApplicationAdapter {
 
 		// Skanujemy dotyk dla maksymalnie 10 palców
 		for (int i = 0; i < 10; ++i) {
+
 			if (Gdx.input.isTouched(i)) {
 				Gdx.app.log("TOUCH", "touch ID: " + i + " x: " + Gdx.input.getX(i) +
-							" y: " + Gdx.input.getY(i));
+						" y: " + Gdx.input.getY(i));
+				if (Gdx.input.getX(i) > Gdx.graphics.getWidth() * 0.6) {
+					Gdx.app.log("TOUCH", "rIGHT");
+					rotationD = rotationSpeed;
+				}
+				if (Gdx.input.getX(i) < Gdx.graphics.getWidth() * 0.4) {
+					Gdx.app.log("TOUCH", "LEFT");
+					rotationD =- rotationSpeed;
+				}
 			}
-		}
 
+
+		}
 		// Zmienna time oznacza czas gry - getDeltaTime zwraca różnicę czasu
 		time += Gdx.graphics.getDeltaTime();
 		float radius = 200;
 		float centerX = 800;
 		float centerY = 800;
-		float srotdeg = time * 180 / 3.14f; // Czas traktujemy jako radiany a obroty wymagają stopni
-		float x = (float)Math.cos(time) * radius + centerX;
-		float y = (float)Math.sin(time) * radius + centerY;
+		srotdeg -= rotationD * Gdx.graphics.getDeltaTime(); // Czas traktujemy jako radiany a obroty wymagają stopni
+		forward = forwardD * Gdx.graphics.getDeltaTime();
+		srotrad = (float) (srotdeg / 180 * Math.PI);
+		x += Math.cos(srotrad) * forward;
+		y += Math.sin(srotrad) * forward;
 
 		// Czyścimy ekran - 0, 0, 0 da czarny, ale na razie jest zielony żeby grid było widać
 		Gdx.gl.glClearColor(0, 1, 0, 1);
@@ -65,7 +89,7 @@ public class GdxHello extends ApplicationAdapter {
 		carCamera.setToOrtho(false, 800, 480); // Rozmiar wirtualnego ekranu
 		carCamera.translate(-400, -240);       // Przestawiamy na środek ekranu początek dla kamery
 		carCamera.translate(25, 25);           // Przestawiamy środek obrotu na środek samochodu
-		carCamera.rotate(srotdeg);             // Obracamy samochód zgodnie z kierunkiem jazdy
+		carCamera.rotate(srotdeg - 90);             // Obracamy samochód zgodnie z kierunkiem jazdy
 		carCamera.update();
 
 
@@ -88,7 +112,7 @@ public class GdxHello extends ApplicationAdapter {
 	}
 	
 	@Override
-	public void dispose () {
+	public void dispose() {
 		batch.dispose();
 		mapa.dispose();
 	}
